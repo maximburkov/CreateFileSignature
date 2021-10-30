@@ -7,7 +7,8 @@ namespace CreateFileSignature
     { 
         Free, 
         Busy,
-        Stopped
+        Stopped,
+        Idle
     }
 
     public class Worker
@@ -34,18 +35,19 @@ namespace CreateFileSignature
         public void AssignAction(Action action)
         {
             this.Action = action;
+            this.Status = Status.Busy;
             hasWork = true;
         }
 
         public void Wait()
         {
-            Console.WriteLine($"Waiting worker {Index}");
+            //Console.WriteLine($"Waiting worker {Index}");
             thread.Join();
         }
 
         public void Stop()
         {
-            Console.WriteLine($"Stopping worker {Index}");
+            //Console.WriteLine($"Stopping worker {Index}");
             Status = Status.Stopped;
             inProgress = false;
         }
@@ -58,16 +60,23 @@ namespace CreateFileSignature
 
         public void Process()
         {
-            inProgress = true;
-            while (inProgress)
+
+            try
             {
-                if(hasWork && this.Status == Status.Free)
+                inProgress = true;
+                while (inProgress)
                 {
-                    this.Status = Status.Busy;
-                    Action?.Invoke();
-                    hasWork = false;
-                    this.Status = Status.Free;
+                    if (hasWork)
+                    {
+                        Action?.Invoke();
+                        hasWork = false;
+                        this.Status = Status.Free;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+
             }
         }
     }

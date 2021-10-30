@@ -1,32 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
 
 namespace CreateFileSignature
 {
     class Program
     {
-        static void GetSha256(byte[] bytes, int index)
-        {
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                var res = BitConverter.ToString(sha256.ComputeHash(bytes));
-                var thread = Thread.CurrentThread.ManagedThreadId;
-                Console.WriteLine($"#{index}, t: {thread}: {res}");
-            }
-        }
-
-        static string GetSha256String(byte[] bytes)
-        {
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                return BitConverter.ToString(sha256.ComputeHash(bytes));
-            }
-        }
-
         static void Main(string[] args)
         {
             #region Generate text file
@@ -45,12 +24,9 @@ namespace CreateFileSignature
 
             //#region Solution
             int chunkLength = 1024 * 1024 * 100;
-            string filePath = "Test.txt";
-            int threadsCount = Environment.ProcessorCount;
-            
+            string filePath = "Test.txt"; // TODO: add as parameter            
             int offset = 0;
             int index = 0;
-
             int bytesReaded;
 
             Stopwatch sw = new Stopwatch();
@@ -76,6 +52,7 @@ namespace CreateFileSignature
                 pool.Finsihwork();
             }
 
+            Console.WriteLine(PrintSignatureCommand.ChunksHandled);
             sw.Stop();
             Console.WriteLine($"Time: {sw.Elapsed.TotalMilliseconds}");
         }

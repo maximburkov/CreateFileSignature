@@ -126,6 +126,9 @@ namespace CreateFileSignature
             {
                 if (queue.TryDequeue(out var command))
                 {
+                    var com = command as PrintSignatureCommand;
+                    Console.WriteLine($"Trying to assign worker for: #{com.Index}");
+
                     bool taskQueued = false;
                     while (!taskQueued)
                     {
@@ -139,6 +142,7 @@ namespace CreateFileSignature
                                 workers.Add(worker);
                                 worker.Index = workers.Count;
                                 worker.Start();
+                                Console.WriteLine($"Started worker with Index {worker.Index} for {com.Index}");
                                 taskQueued = true;
                             }
                             else
@@ -149,6 +153,7 @@ namespace CreateFileSignature
                         else
                         {
                             worker.AssignAction(command.Execute);
+                            Console.WriteLine($"Assigned worker with Index {worker.Index} for {com.Index}");
                             taskQueued = true;
                         }
                     }
