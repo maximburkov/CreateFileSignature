@@ -67,12 +67,8 @@ namespace CreateFileSignature
                     byte[] chunk = new byte[chunkLength];
                     index++;
                     bytesReaded = fileStream.Read(chunk, offset, chunkLength);
-
-                    IndexedAction action = new IndexedAction();
-                    action.Index = index;
-                    action.Bytes = chunk;
-
-                    pool.Enqueue(action);
+                    var command = new PrintSignatureCommand(index, chunk);
+                    pool.Enqueue(command);
                 }
                 while (bytesReaded >= chunkLength);
 
@@ -82,12 +78,6 @@ namespace CreateFileSignature
 
             sw.Stop();
             Console.WriteLine($"Time: {sw.Elapsed.TotalMilliseconds}");
-            //#endregion
-
-            // TODO: 
-            // - Add index  
-
-
         }
     }
 }

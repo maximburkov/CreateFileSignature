@@ -47,7 +47,7 @@ namespace CreateFileSignature
 
         private int threadCount;
 
-        private ConcurrentQueue<IndexedAction> queue = new ConcurrentQueue<IndexedAction>(); // TODO: check if we have issues with action
+        private ConcurrentQueue<ICommand> queue = new ConcurrentQueue<ICommand>(); // TODO: check if we have issues with action
         private bool isDisposed = false;
 
         public WorkerPool(int threadCount)
@@ -89,10 +89,9 @@ namespace CreateFileSignature
             }
         }
 
-        public void Enqueue(IndexedAction action)
+        public void Enqueue(ICommand command)
         {
-            Console.WriteLine($"Enqueued action {action.Index}");
-            queue.Enqueue(action);
+            queue.Enqueue(command);
         }
 
         private void TryToStartTask()
@@ -125,10 +124,8 @@ namespace CreateFileSignature
         {
             while (true)
             {
-                if (queue.TryDequeue(out var indexedAction))
+                if (queue.TryDequeue(out var command))
                 {
-                    Console.WriteLine($"Dequeued action {indexedAction.Index}");
-
                     bool taskQueued = false;
                     while (!taskQueued)
                     {
@@ -138,11 +135,9 @@ namespace CreateFileSignature
                         {
                             if (workers.Count < threadCount)
                             {
-                                worker = new Worker(indexedAction.Execute);
+                                worker = new Worker(command.Execute);
                                 workers.Add(worker);
                                 worker.Index = workers.Count;
-
-                                Console.WriteLine($"Another wroker thread started...{indexedAction.Index}");
                                 worker.Start();
                                 taskQueued = true;
                             }
@@ -153,7 +148,7 @@ namespace CreateFileSignature
                         }
                         else
                         {
-                            worker.AssignAction(indexedAction.Execute);
+                            worker.AssignAction(command.Execute);
                             taskQueued = true;
                         }
                     }
