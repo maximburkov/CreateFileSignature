@@ -3,19 +3,13 @@ using System.Threading;
 
 namespace CreateFileSignature
 {
-    public enum Status 
-    { 
-        Free, 
-        Busy,
-        Stopped,
-        Idle
-    }
-
+    /// <summary>
+    /// Worker wrapper for thread.
+    /// </summary>
     public class Worker
     {
         private Thread thread;
-        private bool hasWork;
-        private bool inProgress;
+        private Action action;
 
         public Worker()
         {
@@ -26,57 +20,62 @@ namespace CreateFileSignature
             this.AssignAction(action);
         }
 
+        /// <summary>
+        /// Indicates if we have work assigned for this worker.
+        /// </summary>
+        public bool HasWork { get; private set; }
+
+        /// <summary>
+        /// Indicates if stop was requested and we shouldn't expect new action assigned.
+        /// </summary>
+        public bool IsStopRequested { get; private set; }
+
+        /// <summary>
+        /// Index of worker. // TODO: check if we need it
+        /// </summary>
+        public int Index { get; set; }
+
+        /// <summary>
+        /// Starts worker processing in new thread.
+        /// </summary>
         public void Start()
         {
             thread = new Thread(Process);
             thread.Start();
         }
 
+        /// <summary>
+        /// Assign action for processing.
+        /// </summary>
+        /// <param name="action"></param>
         public void AssignAction(Action action)
         {
-            this.Action = action;
-            this.Status = Status.Busy;
-            hasWork = true;
+            this.action = action;
+            HasWork = true;
         }
 
-        public void Wait()
+        /// <summary>
+        /// Stops processing loop and waiting for finishsing of assigned job.
+        /// </summary>
+        public void Stop()
         {
-            //Console.WriteLine($"Waiting worker {Index}");
+            this.IsStopRequested = true;
             thread.Join();
         }
 
-        public void Stop()
+        /// <summary>
+        /// Checks if worker has action assigned until stop is requested.
+        /// </summary>
+        private void Process()
         {
-            //Console.WriteLine($"Stopping worker {Index}");
-            Status = Status.Stopped;
-            inProgress = false;
-        }
-
-        public int Index { get; set; }
-
-        public Status Status { get; set; } = Status.Free;
-
-        public Action Action { get; set; }
-
-        public void Process()
-        {
-
-            try
+            while (!this.IsStopRequested)
             {
-                inProgress = true;
-                while (inProgress)
+                if (this.HasWork)
                 {
-                    if (hasWork)
-                    {
-                        Action?.Invoke();
-                        hasWork = false;
-                        this.Status = Status.Free;
-                    }
+                    action?.Invoke();
+                    action = null;
+                    this.HasWork = false;
                 }
-            }
-            catch (Exception ex)
-            {
-
             }
         }
     }
