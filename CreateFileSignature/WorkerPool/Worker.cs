@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace CreateFileSignature
+namespace CreateFileSignature.WorkerPool
 {
     /// <summary>
     /// Worker wrapper for thread.

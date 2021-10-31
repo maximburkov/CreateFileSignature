@@ -1,10 +1,11 @@
-﻿using System;
+﻿using CreateFileSignature.Command;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace CreateFileSignature
+namespace CreateFileSignature.WorkerPool
 {
     /// <summary>
     /// Pool for Managed workers.
@@ -15,7 +16,6 @@ namespace CreateFileSignature
         private List<Worker> workers;
         private int maxThreadCount;
         private ConcurrentQueue<ICommand> comandQueue = new ConcurrentQueue<ICommand>();
-
         private bool isDisposed = false;
 
         public WorkerPool(int threadCount)
@@ -82,7 +82,11 @@ namespace CreateFileSignature
                 {
                     if (isDisposed)
                     {
-                        WaitWorkers();
+                        foreach (var worker in workers)
+                        {
+                            worker.Stop();
+                        }
+
                         return;
                     }
                 }
@@ -92,20 +96,7 @@ namespace CreateFileSignature
         public void Dispose()
         {
             isDisposed = true;
-        }
-
-        public void Finsihwork()
-        {
-            isDisposed = true;
             queueThread.Join();
-        }
-
-        private void WaitWorkers()
-        {
-            foreach (var worker in workers)
-            {
-                worker.Stop();
-            }
         }
     }
 }
