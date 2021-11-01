@@ -31,7 +31,7 @@ namespace CreateFileSignature.WorkerPool
         public bool IsStopRequested { get; private set; }
 
         /// <summary>
-        /// Index of worker. // TODO: check if we need it
+        /// Index of worker. 
         /// </summary>
         public int Index { get; set; }
 

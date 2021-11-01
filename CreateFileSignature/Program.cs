@@ -65,24 +65,11 @@ Command example: 'CreateFileSignature Test.txt 100m n' - this command will parse
 
         static void Main(string[] args)
         {
-            // TODO remove
-            #region Generate text file
-
-            //string path = "Test.txt";
-
-            //using (StreamWriter sw = new StreamWriter(path))
-            //{
-            //    for (int i = 0; i < 100000000; i++)
-            //    {
-            //        sw.WriteLine($"New Line: {i}");
-            //    }
-            //}
-            #endregion
-
-            int chunkLength = 1024 * 1024 * 100;
-            string filePath = "";          
+            int chunkLength = 1024 * 1024 * 100; // default chunk size 100 mb
+            string filePath = string.Empty;          
             string chunkSizeParam = chunkLength.ToString();
-            string isOrderedParam = "N";
+            const string isOrdreredYes = "Y", isOrderedNo = "N";
+            string isOrderedParam = isOrderedNo;
 
             try
             {
@@ -117,16 +104,15 @@ Command example: 'CreateFileSignature Test.txt 100m n' - this command will parse
                 }
 
                 isOrderedParam = isOrderedParam.ToUpperInvariant();
-                if (isOrderedParam != "Y" && isOrderedParam != "N")
+                if (isOrderedParam != isOrdreredYes && isOrderedParam != isOrderedNo)
                 {
                     throw new Exception("Order parameter is incorrect. Should be 'Y' or 'N'.");
                 }
 
-                IOutput output = isOrderedParam == "Y" ? new RealTimeConsoleOutput() : new OrderedConsoleOutput();
+                IOutput output = isOrderedParam == isOrdreredYes ? new OrderedConsoleOutput() : new RealTimeConsoleOutput();
                 ISignatureCommandFactory commandFactory = new SignatureCommandFactory(output);
 
-                int threadCount = Environment.ProcessorCount; // Thread count for pool manager. TODO: chhose better
-                int offset = 0;
+                int threadCount = Environment.ProcessorCount;
                 int chunkIndex = 0;
                 int bytesReaded;
 
@@ -139,7 +125,7 @@ Command example: 'CreateFileSignature Test.txt 100m n' - this command will parse
                     do
                     {
                         byte[] chunk = new byte[chunkLength];
-                        bytesReaded = fileStream.Read(chunk, offset, chunkLength);
+                        bytesReaded = fileStream.Read(chunk, 0, chunkLength);
                         var command = commandFactory.Create(++chunkIndex, chunk);
                         pool.Enqueue(command);
                     }
@@ -154,6 +140,7 @@ Command example: 'CreateFileSignature Test.txt 100m n' - this command will parse
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine(ex.ToString());
+                Console.ForegroundColor = ConsoleColor.White;
             }
         }
     }
