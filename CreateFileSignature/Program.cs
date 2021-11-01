@@ -13,8 +13,8 @@ namespace CreateFileSignature
         {
             string helpText = 
                 @$"Welcome to 'Create signature' program.
-This program generate SHA-256 signature of file chunks.
-You can run this program with command line parameters or add it later.
+This program generates SHA-256 signature of file chunks.
+You can run this program with command line parameters or set them during execution.
 Parameters list:
 1: Path to the file.
 2. Chunk size (bytes by default). You can specify measure after number (without spaces): b - bytes, k - killobytes, m - megabytes. 
@@ -80,7 +80,7 @@ Command example: 'CreateFileSignature Test.txt 100m n' - this command will parse
                     filePath = Console.ReadLine();
                     Console.Write("Chunk size and measure (b/k/m) without spaces:");
                     chunkSizeParam = Console.ReadLine();
-                    Console.Write("Should order output (y/n):");
+                    Console.Write("Should order output (y/n). Using 'y' parameter can affect performance:");
                     isOrderedParam = Console.ReadLine();
                 }
 
